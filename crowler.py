@@ -1,4 +1,4 @@
-from random import choice
+from random import choice,randint
 import requests
 from bs4 import BeautifulSoup
 from multiprocessing import Pool
@@ -11,7 +11,7 @@ import concurrent.futures
 def get_html_info(url, useragent=None, proxy=None):
     '''Повертає html текст'''
     print(f"Current thread is {threading.current_thread().name}")
-    time.sleep(2)
+    time.sleep(randint(0, 4))
     r = requests.get(url, headers=useragent, proxies=proxy)
     return r.text
 
@@ -43,22 +43,23 @@ def get_categories_pages(html):
             new_soup_urls += i.find_all('a', class_="productLink product-name")
 
     items_urls = [f"https://stroyteh.ua{i.get('href')}" for i in new_soup_urls]
-    print(f"Кількість посилань на товари: {items_urls}")
+    print(f"Кількість посилань на товари: {len(items_urls)}")
     return items_urls
 
 def get_proxy():
     proxies = open('proxies.txt').read().split('\n')
     response = False
     while response == False:
-        pr = {"http": "http://" + choice(proxies)}
+        pr_choice = choice(proxies)
+        pr = {"http": "http://" + pr_choice, "https": "https://" + pr_choice}
         try:
             ip_html = requests.get('http://sitespy.ru/my-ip', proxies=pr, timeout=5)
             if ip_html.status_code == requests.codes['ok']:
                 response = True
-                # soup = BeautifulSoup(ip_html.text, 'lxml')
-                # my_ip = soup.find('span', class_='ip').text.strip()
-                # my_useragent = soup.find('span', class_='ip').find_next_sibling('span').text.strip()
-                # print(my_ip)
+                soup = BeautifulSoup(ip_html.text, 'lxml')
+                my_ip = soup.find('span', class_='ip').text.strip()
+                my_useragent = soup.find('span', class_='ip').find_next_sibling('span').text.strip()
+                print(my_ip)
                 # print(pr)
                 return pr
         except Exception:
@@ -69,11 +70,9 @@ def get_all_active_items_urls(base_urls):
     '''Записує в файл посилання на всі активні товари'''
     user_agents = open('useragents.txt').read().split('\n')
 
-
     try:
         u_a = {"User-Agent": choice(user_agents)}
         pr = get_proxy()
-        print('----', pr)
         item_url_list = get_categories_pages(get_html_info(base_urls, useragent=u_a, proxy=pr))
 
         with open('item_url_list.txt', 'a') as f:
