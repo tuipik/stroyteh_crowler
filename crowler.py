@@ -16,20 +16,6 @@ def get_html_info(url, useragent=None, proxy=None):
     return r.text
 
 
-# def get_my_ip():
-#     user_agents = open('useragents.txt').read().split('\n')
-#     proxies = open('proxies.txt').read().split('\n')
-#     ip_html = get_html_info('http://sitespy.ru/my-ip', {"User-Agent": choice(user_agents)},
-#                             # {"http": "http://92.50.155.218:8080"})
-#                             {"http": "http://" + choice(proxies)})
-#     soup = BeautifulSoup(ip_html, 'lxml')
-#     my_ip = soup.find('span', class_='ip').text.strip()
-#     my_useragent = soup.find('span', class_='ip').find_next_sibling('span').text.strip()
-#
-#     print(my_ip)
-#     print(my_useragent)
-
-
 def get_categories_pages(html):
     '''Повертає список посилань на товари'''
     soup = BeautifulSoup(html, 'lxml')
@@ -45,6 +31,7 @@ def get_categories_pages(html):
     items_urls = [f"https://stroyteh.ua{i.get('href')}" for i in new_soup_urls]
     print(f"Кількість посилань на товари: {len(items_urls)}")
     return items_urls
+
 
 def get_proxy():
     proxies = open('proxies.txt').read().split('\n')
@@ -87,9 +74,6 @@ def get_all_active_items_urls(base_urls):
 def main():
 
     base_urls = open('urls.txt').read().split('\n')  # перелік посилань з sitemap.txt
-
-    # with Pool(5) as p:
-    #     p.map(get_all_active_items_urls, base_urls)
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         executor.map(get_all_active_items_urls, base_urls)

@@ -24,6 +24,10 @@
 .idea/
 /item_url_list.txt
 /item_url_list_26k.txt
+/db_connection.py
+/log_urls_done.txt
+/log_urls_with_exceptions.txt
+/stroyteh_item_url_list_26k.txt
 
 
 # User-specific stuff
